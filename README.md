@@ -206,4 +206,5 @@ http://localhost:8080
 
 ## License
 
-This project is developed for internal educational and operational automation within AIESEC. All rights reserved.
+This project is developed for internal educational and operational automation within AIESEC.
+
