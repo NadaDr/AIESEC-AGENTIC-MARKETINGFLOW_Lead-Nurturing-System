@@ -1,0 +1,88 @@
+# Compiled class file
+*.class
+
+# Log files
+*.log
+logs/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven build outputs
+target/
+build/
+out/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Sensitive data, Environment variables & Secrets
+.env
+.env.*
+!.env.example
+*.env
+*.local
+*.secret
+application-local.properties
+application-local.yml
+application-local.yaml
+application-dev.properties
+application-dev.yml
+application-secret.properties
+credentials.json
+*.pem
+*.key
+*.p12
+*.jks
+*.crt
+
+# Project assignment & specifications
+*.pdf
+Cahier_Des_Charges_Mini_Projet.pdf
+
+# Spring Boot & Help
+HELP.md
+**/HELP.md
+
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

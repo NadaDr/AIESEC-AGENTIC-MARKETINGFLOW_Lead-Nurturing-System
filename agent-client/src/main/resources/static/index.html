@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIESEC - Lead Nurturing System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #037ef3;
+    --blue-dark: #0268c9;
+    --blue-soft: #eaf4fe;
+    --bg: #f8f9fb;
+    --panel: #ffffff;
+    --border: #e3e6ea;
+    --text: #222a35;
+    --muted: #8a929c;
+    --label: #5b6470;
+    --sidebar-w: 71px;
+    --topbar-h: 86px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: "Lato", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    position: fixed; inset: 0 auto 0 0;
+    width: var(--sidebar-w);
+    background: var(--blue);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 46px 0 22px;
+    z-index: 10;
+  }
+  .logo {
+    width: 38px; height: 38px;
+    background: #fff; color: var(--blue);
+    display: grid; place-items: center;
+    font-size: 30px; font-style: italic; font-weight: 400;
+    font-family: Georgia, "Times New Roman", serif;
+    margin-bottom: 48px;
+  }
+  .nav { display: flex; flex-direction: column; gap: 22px; flex: 1; }
+  .nav a, .help {
+    width: 48px; height: 56px;
+    display: grid; place-items: center;
+    color: #fff; border-radius: 8px;
+    transition: background .15s;
+  }
+  .nav a:hover, .help:hover { background: rgba(255,255,255,.14); }
+  .nav a.active { background: rgba(255,255,255,.2); }
+  .nav svg, .help svg { width: 38px; height: 38px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: fixed; top: 0; left: var(--sidebar-w); right: 0;
+    height: var(--topbar-h);
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0 0 25px;
+    z-index: 5;
+  }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 400; color: var(--text); }
+  .topbar .profile {
+    height: 100%; width: 75px;
+    border-left: 1px solid var(--border);
+    display: grid; place-items: center;
+  }
+  .avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffb36b, #f0596f);
+    color: #fff; font-weight: 700; font-size: 17px;
+    display: grid; place-items: center;
+  }
+
+  /* ---------- Layout ---------- */
+  main {
+    margin-left: var(--sidebar-w);
+    padding: calc(var(--topbar-h) + 50px) 0 40px 50px;
+    display: grid;
+    grid-template-columns: minmax(0, 813px) minmax(280px, 1fr);
+    gap: 50px;
+    min-height: 100vh;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  /* ---------- Chat card ---------- */
+  .chat-card {
+    display: flex; flex-direction: column;
+    height: calc(100vh - var(--topbar-h) - 90px);
+    min-height: 520px;
+  }
+  .chat-head { padding: 28px 40px 22px; border-bottom: 1px solid var(--border); }
+  .chat-head h2 { margin: 0; font-size: 36px; font-weight: 400; letter-spacing: -.2px; }
+  .chat-head p { margin: 8px 0 0; color: var(--muted); font-size: 16px; }
+
+  #chat {
+    flex: 1; overflow-y: auto;
+    padding: 28px 40px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .row { display: flex; gap: 12px; align-items: flex-end; }
+  .row.user { justify-content: flex-end; }
+  .bot-icon {
+    flex: none; width: 38px; height: 38px;
+    background: var(--blue-soft); border-radius: 4px;
+    display: grid; place-items: center; color: var(--blue);
+  }
+  .bot-icon svg { width: 22px; height: 22px; }
+  .msg {
+    max-width: 72%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    font-size: 15.5px;
+  }
+  .msg.user {
+    background: var(--blue); color: #fff;
+    border-bottom-right-radius: 2px;
+  }
+  .msg.bot {
+    background: #fff; color: var(--text);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 2px;
+  }
+  .msg.bot.error { background: #fdeeee; border-color: #f5c6c6; color: #a12626; }
+  .msg.pending { color: var(--muted); }
+  .dots span {
+    display: inline-block; width: 6px; height: 6px; margin-right: 4px;
+    border-radius: 50%; background: var(--muted);
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100% { opacity: .25 } 40% { opacity: 1 } }
+
+  form {
+    display: flex; gap: 10px;
+    padding: 18px 40px 24px;
+    border-top: 1px solid var(--border);
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit; font-size: 15.5px; color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input[type="text"]::placeholder { color: #a8afb8; }
+  input[type="text"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(3,126,243,.12); }
+  button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 24px;
+    border: none; border-radius: 4px;
+    background: var(--blue); color: #fff;
+    font: inherit; font-size: 15.5px; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+  }
+  button:hover:not(:disabled) { background: var(--blue-dark); }
+  button:disabled { opacity: .55; cursor: default; }
+  button svg { width: 18px; height: 18px; }
+
+  /* ---------- Side panel ---------- */
+  .side { display: flex; flex-direction: column; gap: 30px; align-self: start; }
+  .side .card { padding: 34px 40px 28px; border-right: 0; border-radius: 4px 0 0 4px; }
+  .side h3 { margin: 0 0 22px; font-size: 18px; font-weight: 700; }
+  .section-label {
+    font-size: 15px; letter-spacing: .3px; color: var(--label);
+    text-transform: uppercase; margin: 0 0 22px;
+  }
+  .quick { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .quick button {
+    all: unset; cursor: pointer;
+    display: flex; align-items: center; gap: 18px;
+    padding: 4px 0; font-size: 18px; color: var(--text);
+  }
+  .quick button:hover span { color: var(--blue); }
+  .tile {
+    flex: none; width: 40px; height: 40px;
+    background: #f1f3f6; border-radius: 3px;
+    display: grid; place-items: center; color: var(--blue);
+  }
+  .tile svg { width: 26px; height: 26px; }
+  .muted { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 0; }
+
+  @media (max-width: 1100px) {
+    main { grid-template-columns: 1fr; padding-right: 30px; padding-left: 30px; }
+    .side .card { border-right: 1px solid var(--border); border-radius: 4px; }
+  }
+  @media (max-width: 640px) {
+    :root { --sidebar-w: 0px; }
+    .sidebar { display: none; }
+    main { padding: calc(var(--topbar-h) + 20px) 14px 20px; gap: 20px; }
+    .chat-head, #chat, form { padding-left: 18px; padding-right: 18px; }
+    .chat-head h2 { font-size: 26px; }
+    .msg { max-width: 85%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">A</div>
+  <nav class="nav" aria-label="Main">
+    <a href="#" title="People"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 19.5c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6z"/><circle cx="16.5" cy="7.5" r="3"/><path d="M17 13.6c2.7.4 4.5 2.6 4.5 5.4h-4"/></svg></a>
+    <a href="#" title="Opportunities"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg></a>
+    <a href="#" class="active" title="Lead Nurturing System"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M4 5h16v11H9l-4 3.5V16H4z"/><path d="M8 9.5h8M8 12.5h5" stroke-linecap="round"/></svg></a>
+    <a href="#" title="Organisations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="5" width="7" height="15" rx="1"/><rect x="13" y="3" width="7" height="17" rx="1"/><path d="M6.5 8h2M6.5 11h2M6.5 14h2M15.5 6h2M15.5 9h2M15.5 12h2M15.5 15h2"/></svg></a>
+    <a href="#" title="Committees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="2.5" y="16" width="5" height="4" rx="1"/><rect x="9.5" y="16" width="5" height="4" rx="1"/><rect x="16.5" y="16" width="5" height="4" rx="1"/><path d="M12 7v9M5 16v-3h14v3"/></svg></a>
+    <a href="#" title="Analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M11 4a8 8 0 1 0 9 9h-9z"/><path d="M14 2.5a7.5 7.5 0 0 1 7.5 7.5H14z"/></svg></a>
+    <a href="#" title="Resource center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M3 18V6a1 1 0 0 1 1-1h5l2 2h7a1 1 0 0 1 1 1v2"/><path d="M3 18l2.5-8h16L19 18z"/></svg></a>
+  </nav>
+  <a href="#" class="help" title="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.9v.6"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></a>
+</aside>
+
+<!-- Top bar -->
+<header class="topbar">
+  <h1>Lead Nurturing System</h1>
+  <div class="profile"><div class="avatar" aria-hidden="true">A</div></div>
+</header>
+
+<main>
+  <!-- Chat -->
+  <section class="card chat-card">
+    <div class="chat-head">
+      <h2>Hey there! 👋</h2>
+      <p>Ask about Leads , EXPA registration stats, Available Opportunities Matching </p>
+    </div>
+
+    <div id="chat"></div>
+
+    <form id="chat-form">
+      <input id="chat-input" type="text" placeholder="Type your message..." autocomplete="off" required>
+      <button id="send-btn" type="submit">
+        Send
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <!-- Side panel -->
+  <aside class="side">
+    <div class="card">
+      <p class="section-label">Quick prompts</p>
+      <div class="quick">
+        <button type="button" data-prompt="Summarise our active marketing campaigns.">
+          <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M3 10v4h3l6 4V6L6 10z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke-linecap="round"/></svg></div>
+          <span>Campaigns</span>
+        </button>
+        <button type="button" data-prompt="Show me EXPA registration stats for this month.">
+          <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 19.5c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6z"/><path d="M18 9v6M15 12h6" stroke-linecap="round"/></svg></div>
+          <span>EXPA registrations</span>
+        </button>
+        <button type="button" data-prompt="Which dataset indicators are performing best?">
+          <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M11 4a8 8 0 1 0 9 9h-9z"/><path d="M14 2.5a7.5 7.5 0 0 1 7.5 7.5H14z"/></svg></div>
+          <span>Dataset indicators</span>
+        </button>
+        <button type="button" data-prompt="Give me ideas for our next recruitment campaign.">
+          <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg></div>
+          <span>Campaign ideas</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>About</h3>
+      <p class="muted">Synchronous chat — each reply arrives in full once the assistant has finished thinking.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+(function () {
+  const chatEl = document.getElementById('chat');
+  const formEl = document.getElementById('chat-form');
+  const inputEl = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  const conversationId = 'web-session-' + Math.random().toString(36).slice(2, 10);
+
+  const botIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 5h16v11H9l-4 3.5V16H4z"/><path d="M8 9.5h8M8 12.5h5" stroke-linecap="round"/></svg>';
+
+  function appendMessage(text, role, isError) {
+    const row = document.createElement('div');
+    row.className = 'row ' + role;
+
+    if (role === 'bot') {
+      const icon = document.createElement('div');
+      icon.className = 'bot-icon';
+      icon.innerHTML = botIconSvg;
+      row.appendChild(icon);
+    }
+
+    const div = document.createElement('div');
+    div.className = 'msg ' + role + (isError ? ' error' : '');
+    div.textContent = text;
+    row.appendChild(div);
+
+    chatEl.appendChild(row);
+    chatEl.scrollTop = chatEl.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage(message) {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, conversationId: conversationId })
+    });
+
+    if (!response.ok) {
+      throw new Error('Server responded with status ' + response.status);
+    }
+
+    const data = await response.json();
+    return data.response;
+  }
+
+  formEl.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const message = inputEl.value.trim();
+    if (!message) {
+      return;
+    }
+
+    appendMessage(message, 'user');
+    inputEl.value = '';
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+
+    const pending = appendMessage('', 'bot');
+    pending.classList.add('pending');
+    pending.innerHTML = '<span class="dots" aria-label="Thinking"><span></span><span></span><span></span></span>';
+
+    sendMessage(message)
+      .then(function (reply) {
+        pending.textContent = reply;
+      })
+      .catch(function (err) {
+        pending.textContent = 'Error: could not reach the agent (' + err.message + ').';
+        pending.classList.add('error');
+      })
+      .finally(function () {
+        pending.classList.remove('pending');
+        chatEl.scrollTop = chatEl.scrollHeight;
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        inputEl.focus();
+      });
+  });
+
+  // Quick prompts fill and send the message
+  document.querySelectorAll('.quick button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (sendBtn.disabled) return;
+      inputEl.value = btn.dataset.prompt;
+      formEl.requestSubmit();
+    });
+  });
+
+  appendMessage('Hi! I am your AIESEC Marketing Assistant. Ask me about campaigns, EXPA statistics, or the campaign dataset.', 'bot');
+})();
+</script>
+</body>
+</html>

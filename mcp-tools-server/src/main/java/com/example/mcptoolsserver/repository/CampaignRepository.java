@@ -1,0 +1,21 @@
+
+package com.example.mcptoolsserver.repository;
+
+import com.example.mcptoolsserver.entities.Campaign;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CampaignRepository extends JpaRepository<Campaign, Long> {
+
+    List<Campaign> findByStatus(String status);
+
+    List<Campaign> findByPlatform(String platform);
+
+    List<Campaign> findByTargetAudience(String targetAudience);
+
+    List<Campaign> findByNameContainingIgnoreCase(String name);
+
+}
